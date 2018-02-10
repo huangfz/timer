@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>18年假期倒计时</title>
+</head>
+<body>
+<input type="date" placeholder="哪天开始上班" class="endTime">
+<button class="startBtn">看看我还有多久假期</button>
+<p class="endShow">2018年02月23号上班</p>
+<script>
+    this.Play = {};
+    (function() {
+        var go = function () {
+            this.endTime = new Date('2018/2/23 00:00:00').getTime()
+            this.init()
+        }
+        var p = go.prototype;
+
+        //初始化
+        p.init = function() {
+            var me = this;
+            var p = document.createElement('p'),
+                body = document.getElementsByTagName('body')[0];
+            p.className = 'time';
+            body.appendChild(p);
+            me.pTime = document.getElementsByClassName('time')[0];
+            me.endShow = document.getElementsByClassName('endShow')[0];
+            me.startBtn = document.getElementsByClassName('startBtn')[0];
+            me.endTimeInput = document.getElementsByClassName('endTime')[0];
+            me.setMinDate()
+            setInterval(function () {
+                me.getTime();
+            },1)
+            // me.setEndtime(me.endTime);
+            me.event();
+        };
+
+        // 设置时间限制
+        p.setMinDate = function () {
+            var today = new Date()
+            var year = today.getFullYear(),
+                month = today.getMonth() + 1,
+                day = today.getDate()
+            month = month < 10 ? '0' + month : month
+            day = day < 10 ? '0' + day : day
+            this.endTimeInput.min = year + '-' + month + '-' + day
+        }
+        //设置结束值
+        p.setEndtime = function(t) {
+            let me = this
+            let t1 = t.replace(/-/g, '/') + ' 00:00:00'
+            let t2 = t.split('-')
+            me.endShow.innerText = t2[0] + '年' + t2[1] + '月' + t2[2] + '号上班'
+            me.endTime = new Date(t1).getTime();
+            if (this.timer) {
+                clearInterval(this.timer)
+            }
+            this.timer = setInterval(function () {
+                me.getTime();
+            },1)
+        }
+
+        //计算时间差
+        p.getTime = function() {
+            var me = this,
+                now = new Date().getTime(),
+                interval = Math.abs(now - me.endTime);
+            if (me.endTime >= now) {
+                var showText = '距离假期结束还有'+me.setString(interval)
+                if (me.endTime - now > 24*3600000 * 3) {
+                    showText+='——假期充足，放心的玩吧~'
+                } else {
+                    showText+='——假期余额不足'
+                }
+                me.pTime.innerText = showText
+            } else {
+                me.pTime.innerText = '醒醒吧！今天已经上班了！'
+            }
+        }
+
+        //设置时间差字符串
+        p.setString = function(interval) {
+            //计算出小时数
+            var day=Math.floor(interval/(24*3600*1000))
+            var leave1=interval%(24*3600*1000)    //计算天数后剩余的毫秒数
+            var hours=Math.floor(leave1/(3600*1000))//计算相差分钟数
+            var leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
+            var minutes=Math.floor(leave2/(60*1000))//计算相差秒数
+            var leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数
+            var seconds=Math.round(leave3/1000)
+            var ms=leave3%1000
+            seconds = seconds < 10 ? '0' + seconds : seconds
+            ms = ms < 10 ? '00' + ms : ms < 100 ? '0' + ms : ms
+            return day + '天' + hours+'小时'+minutes+'分钟'+seconds+'秒'+ms+'毫秒'
+        }
+
+        //事件
+        p.event = function() {
+            var me = this;
+            me.startBtn.onclick = function () {
+                if(me.endTimeInput.value){
+                    var str = me.endTimeInput.value;
+                    me.setEndtime(str)
+                }else{
+                    alert('请选择假期结束时间！')
+                }
+            }
+        }
+
+        Play.go = go;
+    })();
+    new Play.go();
+</script>
+</body>
+</html>

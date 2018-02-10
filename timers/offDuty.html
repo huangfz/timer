@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>下班时间默认17：00</title>
+</head>
+<body>
+<input type="time" placeholder="下班时间，例（17:00）" class="endTime">
+<button class="startBtn">开始计算</button>
+<script>
+    this.Play = {};
+    (function() {
+        var go = function () {
+            this.init();
+        }
+        var p = go.prototype;
+
+        //初始化
+        p.init = function() {
+            var me = this;
+            var p = document.createElement('p'),
+                body = document.getElementsByTagName('body')[0];
+            p.className = 'time';
+            body.appendChild(p);
+            me.pTime = document.getElementsByClassName('time')[0];
+            me.startBtn = document.getElementsByClassName('startBtn')[0];
+            me.endTimeInput = document.getElementsByClassName('endTime')[0];
+            me.setEndtime('17:00:00');
+            me.event();
+        };
+
+        //设置结束值
+        p.setEndtime = function(t) {
+            var me = this,
+                today = new Date(),
+                year = today.getFullYear(),
+                month = today.getMonth() + 1,
+                day = today.getDate(),
+                hour = today.getHours(),
+                now = today.getTime();
+            me.endTime = new Date(year+'/'+month+'/'+day+' '+t).getTime();
+            setInterval(function () {
+                me.getTime();
+            },1)
+        }
+
+        //获取当前时间
+        p.getTime = function() {
+            var me = this,
+                now = new Date().getTime(),
+                interval = Math.abs(now - me.endTime);
+            if(me.endTime>=now){
+                me.pTime.innerText = '距离下班还有'+me.setString(interval)
+            }else{
+                me.pTime.innerText = '已加班'+me.setString(interval)
+            }
+        }
+
+        //设置时间差字符串
+        p.setString = function(interval) {
+            //计算出小时数
+            var leave1=interval%(24*3600*1000)    //计算天数后剩余的毫秒数
+            var hours=Math.floor(leave1/(3600*1000))//计算相差分钟数
+            var leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
+            var minutes=Math.floor(leave2/(60*1000))//计算相差秒数
+            var leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数
+            var seconds=Math.round(leave3/1000)
+            var ms=leave3%1000
+            return hours+'小时'+minutes+'分钟'+seconds+'秒'+ms+'毫秒'
+        }
+
+        //事件
+        p.event = function() {
+            var me = this;
+            me.startBtn.onclick = function () {
+                if(me.endTimeInput.value){
+                    var str = me.endTimeInput.value;
+                    me.setEndtime(str)
+                }else{
+                    alert('请输入下班时间')
+                }
+            }
+        }
+
+        Play.go = go;
+    })();
+    new Play.go();
+</script>
+</body>
+</html>
